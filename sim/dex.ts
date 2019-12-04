@@ -48,7 +48,7 @@ import {PRNG, PRNGSeed} from './prng';
 
 const DATA_DIR = path.resolve(__dirname, '../data');
 const MODS_DIR = path.resolve(__dirname, '../data/mods');
-const FORMATS = path.resolve(__dirname, '../config/formats');
+const FORMATS = path.resolve(__dirname, '../config/tpp-formats');
 
 const dexes: {[mod: string]: ModdedDex} = Object.create(null);
 
