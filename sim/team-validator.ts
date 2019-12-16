@@ -1079,12 +1079,15 @@ export class TeamValidator {
 				throw new Error(`Species ${template.name} has a required ability despite not being a battle-only forme; it should just be in its abilities table.`);
 			}
 			if (template.requiredItems && !template.requiredItems.includes(item.name)) {
-				// Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
-				problems.push(`${name} needs to hold ${Chat.toOrList(template.requiredItems)}.`);
-			}
-			if (template.requiredMove && !set.moves.includes(toID(template.requiredMove))) {
-				// Keldeo-Resolute
-				problems.push(`${name} needs to have the move ${template.requiredMove}.`);
+				if (dex.gen >= 8 && (template.baseSpecies === 'Arceus' || template.baseSpecies === 'Silvally')) {
+					// Arceus/Silvally formes in gen 8 only require the item with Multitype/RKS System
+					if (set.ability === template.abilities[0]) {
+						problems.push(`${name} needs to hold ${Chat.toOrList(template.requiredItems)}.`);
+					}
+				} else {
+					// Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
+					problems.push(`${name} needs to hold ${Chat.toOrList(template.requiredItems)}.`);
+				}
 			}
 
 			// Mismatches between the set forme (if not base) and the item signature forme will have been rejected already.
@@ -1104,6 +1107,16 @@ export class TeamValidator {
 					set.species = cosplay[moveid];
 					break;
 				}
+			}
+		}
+
+		const crowned: {[k: string]: string} = {
+			'Zacian-Crowned': 'behemothblade', 'Zamazenta-Crowned': 'behemothbash',
+		};
+		if (set.species in crowned) {
+			const ironHead = set.moves.indexOf('ironhead');
+			if (ironHead >= 0) {
+				set.moves[ironHead] = crowned[set.species];
 			}
 		}
 		return problems;
@@ -1838,9 +1851,9 @@ export class TeamValidator {
 			template = this.dex.getTemplate(template.prevo);
 			if (template.gen > Math.max(2, this.dex.gen)) return null;
 			return template;
-		} else if (template.inheritsLearnsetFrom) {
+		} else if (template.inheritsFrom) {
 			// For Pokemon like Rotom, Necrozma, and Gmax formes whose movesets are extensions are their base formes
-			return this.dex.getTemplate(template.inheritsLearnsetFrom);
+			return this.dex.getTemplate(Array.isArray(template.inheritsFrom) ? template.inheritsFrom[0] : template.inheritsFrom);
 		}
 		return null;
 	}

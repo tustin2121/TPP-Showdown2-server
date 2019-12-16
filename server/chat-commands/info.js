@@ -585,7 +585,7 @@ const commands = {
 								evos.push(`${evo.name} (level-up with ${evo.evoMove}${condition})`);
 								break;
 							case 'other':
-								evos.push(`${evo.name} (${condition})`);
+								evos.push(`${evo.name} (${evo.evoCondition})`);
 								break;
 							case 'trade':
 								evos.push(`${evo.name} (trade)`);
@@ -691,9 +691,13 @@ const commands = {
 						}
 					}
 
-					if (dex.gen >= 8 && move.isMax) {
-						details["&#10003; Max Move"] = "";
-						if (typeof move.isMax === "string") details["User"] = move.isMax + "-Gmax";
+					if (dex.gen >= 8) {
+						if (move.isMax) {
+							details["&#10003; Max Move"] = "";
+							if (typeof move.isMax === "string") details["User"] = move.isMax + "-Gmax";
+						} else if (move.gmaxPower) {
+							details["Dynamax Power"] = move.gmaxPower;
+						}
 					}
 
 					details["Target"] = {
@@ -1966,12 +1970,15 @@ const commands = {
 		let ability = Dex.getAbility(targets[0]);
 		let format = Dex.getFormat(targets[0]);
 		let atLeastOne = false;
-		let generation = (targets[1] || 'sm').trim().toLowerCase();
-		let genNumber = 7;
+		let generation = (targets[1] || 'ss').trim().toLowerCase();
+		let genNumber = 8;
 		let extraFormat = Dex.getFormat(targets[2]);
 
-		if (['7', 'gen7', 'seven', 'sm', 'sumo', 'usm', 'usum'].includes(generation)) {
+		if (['8', 'gen8', 'eight', 'ss', 'swsh'].includes(generation)) {
+			generation = 'ss';
+		} else if (['7', 'gen7', 'seven', 'sm', 'sumo', 'usm', 'usum'].includes(generation)) {
 			generation = 'sm';
+			genNumber = 7;
 		} else if (['6', 'gen6', 'oras', 'six', 'xy'].includes(generation)) {
 			generation = 'xy';
 			genNumber = 6;
@@ -1991,7 +1998,7 @@ const commands = {
 			generation = 'rb';
 			genNumber = 1;
 		} else {
-			generation = 'sm';
+			generation = 'ss';
 		}
 
 		// Pokemon
@@ -2131,7 +2138,7 @@ const commands = {
 		// Pokemon
 		if (pokemon.exists) {
 			atLeastOne = true;
-			if (pokemon.isNonstandard) return this.errorReply(`${pokemon.species} is not a real Pok\u00e9mon.`);
+			if (pokemon.isNonstandard && pokemon.isNonstandard !== 'Past') return this.errorReply(`${pokemon.species} is not a real Pok\u00e9mon.`);
 
 			let baseSpecies = pokemon.baseSpecies || pokemon.species;
 			let forme = pokemon.forme;
@@ -2159,7 +2166,7 @@ const commands = {
 		// Item
 		if (item.exists) {
 			atLeastOne = true;
-			if (item.isNonstandard) return this.errorReply(`${item.name} is not a real item.`);
+			if (item.isNonstandard && item.isNonstandard !== 'Past') return this.errorReply(`${item.name} is not a real item.`);
 			let link = baseLink + 'items/' + item.name.toLowerCase();
 			this.sendReplyBox(`<a href="${link}">${item.name} item description</a> by Veekun`);
 		}
@@ -2167,7 +2174,7 @@ const commands = {
 		// Ability
 		if (ability.exists) {
 			atLeastOne = true;
-			if (ability.isNonstandard) return this.errorReply(`${ability.name} is not a real ability.`);
+			if (ability.isNonstandard && ability.isNonstandard !== 'Past') return this.errorReply(`${ability.name} is not a real ability.`);
 			let link = baseLink + 'abilities/' + ability.name.toLowerCase();
 			this.sendReplyBox(`<a href="${link}">${ability.name} ability description</a> by Veekun`);
 		}
@@ -2175,7 +2182,7 @@ const commands = {
 		// Move
 		if (move.exists) {
 			atLeastOne = true;
-			if (move.isNonstandard) return this.errorReply(`${move.name} is not a real move.`);
+			if (move.isNonstandard && move.isNonstandard !== 'Past') return this.errorReply(`${move.name} is not a real move.`);
 			let link = baseLink + 'moves/' + move.name.toLowerCase();
 			this.sendReplyBox(`<a href="${link}">${move.name} move description</a> by Veekun`);
 		}
